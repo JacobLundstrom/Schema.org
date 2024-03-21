@@ -1,28 +1,30 @@
 <script>
-  let categories = [
+  // Läser in sparade kategorier från localStorage eller använder standardvärden om inget finns sparad.
+  let categories = JSON.parse(localStorage.getItem('categories')) || [
     {
-      name: 'To do',
+      name: 'Category 1',
       expanded: false,
       subcategories: [
-        { name: 'Jacob', tasks: [], expanded: false },
-        { name: 'Test', tasks: [], expanded: false }
+        { name: 'Subcategory 1', inputs: [], expanded: false },
+        { name: 'Subcategory 2', inputs: [], expanded: false }
       ]
     },
     {
-      name: 'Completed',
+      name: 'Category 2',
       expanded: false,
       subcategories: [
-        { name: 'Jacob', tasks: [], expanded: false },
-        { name: 'Test', tasks: [], expanded: false }
+        { name: 'Subcategory 1', inputs: [], expanded: false },
+        { name: 'Subcategory 2', inputs: [], expanded: false }
       ]
     }
   ];
 
   let expandedCategories = [];
   let selectedCategory = '';
-  let selectedPerson = '';
-  let newTask = '';
+  let selectedSubCat = '';
+  let newInput = '';
 
+  // Funktion för att växla kategoriens expanderade tillstånd
   function toggleCategory(categoryName) {
     if (expandedCategories.includes(categoryName)) {
       expandedCategories = expandedCategories.filter(name => name !== categoryName);
@@ -31,30 +33,40 @@
     }
   }
 
+  // Funktion för att växla underkategoriens expanderade tillstånd
   function toggleSubcategory(categoryName, subcategoryName) {
     const categoryIndex = categories.findIndex(cat => cat.name === categoryName);
     const subcategoryIndex = categories[categoryIndex].subcategories.findIndex(subcat => subcat.name === subcategoryName);
     categories[categoryIndex].subcategories[subcategoryIndex].expanded = !categories[categoryIndex].subcategories[subcategoryIndex].expanded;
   }
 
-  function saveTask(newTask) {
-    if (!selectedCategory || !selectedPerson) return;
+  // Funktion för att spara en ny input och uppdatera localStorage
+  function saveInput(newInput) {
+    if (!selectedCategory || !selectedSubCat) return;
 
     const selectedCategoryIndex = categories.findIndex(cat => cat.name === selectedCategory);
-    const selectedSubcategoryIndex = categories[selectedCategoryIndex].subcategories.findIndex(subcat => subcat.name === selectedPerson);
+    const selectedSubcategoryIndex = categories[selectedCategoryIndex].subcategories.findIndex(subcat => subcat.name === selectedSubCat);
 
     if (selectedSubcategoryIndex !== -1) {
-      categories[selectedCategoryIndex].subcategories[selectedSubcategoryIndex].tasks.push(newTask);
+      categories[selectedCategoryIndex].subcategories[selectedSubcategoryIndex].inputs.push(newInput);
+      // Uppdaterar kategorierna och sparar till localStorage
       categories = [...categories];
+      localStorage.setItem('categories', JSON.stringify(categories));
     }
   }
-  function removeTask(categoryName, subcategoryName, taskIndex) {
+
+  // Funktion för att radera en input och uppdatera localStorage
+  function removeInput(categoryName, subcategoryName, inputIndex) {
     const categoryIndex = categories.findIndex(cat => cat.name === categoryName);
     const subcategoryIndex = categories[categoryIndex].subcategories.findIndex(subcat => subcat.name === subcategoryName);
-    categories[categoryIndex].subcategories[subcategoryIndex].tasks.splice(taskIndex, 1);
+    categories[categoryIndex].subcategories[subcategoryIndex].inputs.splice(inputIndex, 1);
+    // Uppdaterar kategorierna och sparar till localStorage
     categories = [...categories];
+    localStorage.setItem('categories', JSON.stringify(categories));
   }
 </script>
+
+
 
   
 <main class="container">
@@ -69,15 +81,15 @@
           <ul>
             {#each category.subcategories as subcategory}
               <li>
-                <div class="person-header" on:click={() => toggleSubcategory(category.name, subcategory.name)}>
+                <div class="subcategory-header" on:click={() => toggleSubcategory(category.name, subcategory.name)}>
                   <span>{subcategory.name}</span>
                   <button class="expand-subcategory">{subcategory.expanded ? '-' : '+'}</button>
                 </div>
                 {#if subcategory.expanded}
-                  {#each subcategory.tasks as task, index}
+                  {#each subcategory.inputs as input, index}
                     <li class="output">
-                      {task}
-                      <button class="remove-button" on:click={() => removeTask(category.name, subcategory.name, index)}>X</button>
+                      {input}
+                      <button class="remove-button" on:click={() => removeInput(category.name, subcategory.name, index)}>X</button>
                     </li>
                   {/each}
                 {/if}
@@ -88,43 +100,42 @@
       </div>
     {/each}
   </div>
-  
-
 
   <div class="right-panel">
-    <h2>Lägg till ny uppgift</h2>
+    <h2>Lägg till ny input</h2>
     <div>
       <label>Välj kategori:</label>
       <select bind:value={selectedCategory}>
         <option value="">Välj kategori</option>
-        <option value="To do">To do</option>
-        <option value="Completed">Completed</option>
+        {#each categories as category}
+          <option value={category.name}>{category.name}</option>
+        {/each}
       </select>
     </div>
   
     {#if selectedCategory}
       <div>
-        <label>Välj person:</label>
-        <select bind:value={selectedPerson}>
-          <option value="">Välj person</option>
+        <label>Välj underkategori:</label>
+        <select bind:value={selectedSubCat}>
+          <option value="">Välj underkategori</option>
           {#each categories.find(cat => cat.name === selectedCategory).subcategories as subcategory}
             <option value={subcategory.name}>{subcategory.name}</option>
           {/each}
         </select>
       </div>
   
-      {#if selectedPerson}
+      {#if selectedSubCat}
         <div>
-          <label>Ny uppgift:</label>
-          <input type="text" bind:value={newTask} placeholder="Ange ny uppgift">
+          <label>Ny input:</label>
+          <input type="text" bind:value={newInput} placeholder="Ange ny input">
         </div>
   
-        <button on:click={() => saveTask(newTask)}>Spara uppgift</button>
+        <button on:click={() => saveInput(newInput)}>Spara input</button>
       {/if}
     {/if}
   </div>
-  
-  </main>
+</main>
+
   
 
   
@@ -134,7 +145,7 @@
     background-color: #afacac;
   }
   .container {
-    margin-top: 20px;
+    margin-top: 50px;
     display: flex;
     justify-content: space-between;
     padding: 40px;
@@ -143,19 +154,20 @@
   .left-panel {
     width: auto;
     max-width: 30%;
-    margin-left: 15%;
+    margin-left: 22%;
     padding: 20px;
     border-radius: 8px;
     background-color: #F0F0F0;
   }
 
   .right-panel {
-    margin-right: 10%;
-    width: 40%;
+    margin-right: 17%;
+    width: 30%;
     background-color: #F0F0F0;
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    max-height: 350px;
   }
 
   .category {
@@ -173,7 +185,7 @@
     width: auto;
   }
 
-  .person-header {
+  .subcategory-header {
     cursor: pointer;
     display: flex;
     justify-content: space-between;
