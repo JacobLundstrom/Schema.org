@@ -146,6 +146,7 @@
     margin-left: 15%;
     padding: 20px;
     border-radius: 8px;
+    background-color: #F0F0F0;
   }
 
   .right-panel {
@@ -208,27 +209,31 @@
     border-radius: 4px;
     cursor: pointer;
     transition: background-color 0.3s ease;
+    background-color: #6060e0;
+    color: #fff;
   }
 
   button:hover {
     background-color: #ddd;
+    color:#333;
   }
 
   .remove-button {
     cursor: pointer;
     font-size: small;
-    color: red;
+    color: white;
     margin: 0%;
     padding: 3px;
+    background-color: red;
   }
 
 .expand-category {
- background-color: orange;
+ background-color: #6060e0;
  margin-left: 200px; 
 }
 
 .expand-subcategory {
-  background-color: orange;
+  background-color: #6060e0;
  }
 
 
